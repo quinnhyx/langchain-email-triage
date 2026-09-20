@@ -32,7 +32,8 @@ CATEGORY RULES:
 - newsletter: Periodic subscribed content such as daily digests,
   weekly digests, news summaries, industry updates, or blog updates.
   If the main purpose is shopping, promotions, or order information,
-  classify it as shopping instead.
+  classify it as shopping instead. Routine newsletters or digests that 
+  do not require any action should normally be classified as "ignore".
 
 - personal: Emails related to private life or personal relationships,
   including friends, family, personal invitations, appointments,
@@ -42,17 +43,28 @@ CATEGORY RULES:
 
 
 ACTION RULES:
-- reply: The sender asks a question, requests information,
-  asks for confirmation or a decision, or clearly expects a response.
 
-- read: No response is required, but the information is useful
-  or important for the user to know.
+Determine the action using the following order:
 
-- ignore: No response is required and the email does not require
-  the user's attention. Promotional, marketing, advertising, discount, or bulk emails
-  should normally be ignored if no action is required,
-  even when they use urgency language such as
-  "today only", "limited time", or "expires soon".
+1. reply:
+- Classify as "reply" only when the sender expects a direct response
+  from the user.
+- This includes answering a question, providing requested information,
+  confirming something, or communicating a decision to the sender.
+- A request to take an external action does not by itself require a reply.
+
+2. read:
+- If no direct response to the sender is required, classify as "read"
+  when the user should know the information or needs to take an external action.
+- External actions include completing a task, updating information,
+  making a payment, visiting a website, attending an event, or meeting a deadline.
+- The user may need to act urgently while the email is still classified as "read".
+
+3. ignore:
+- If no direct response is required and no meaningful external action is required,
+  classify as "ignore" when the information does not require the user's attention.
+- Routine newsletters, advertisements, promotions, discounts, and other
+  non-essential bulk emails should normally be classified as "ignore".
 
 
 PRIORITY RULES:
@@ -259,11 +271,6 @@ print(f"Priority Accuracy: {priority_accuracy:.2%}")
 
 df = pd.DataFrame(evaluation_results)
 
-critical_errors = df[
-    (df["expected_action"] == "reply") &
-    (df["predicted_action"] == "ignore")
-]
-
 def confusion_matrix(df, expected_col, predicted_col):
     return pd.crosstab(
         df[expected_col],
@@ -274,7 +281,28 @@ action_confusion_matrix = confusion_matrix(df, "expected_action", "predicted_act
 category_confusion_matrix = confusion_matrix(df, "expected_category", "predicted_category")
 priority_confusion_matrix = confusion_matrix(df, "expected_priority", "predicted_priority")
 
-print(critical_errors)
-print(action_confusion_matrix)
-print(category_confusion_matrix)
-print(priority_confusion_matrix)
+critical_errors = df[
+    (df["expected_action"] == "reply") &
+    (df["predicted_action"] == "ignore")
+]
+
+action_errors = df[
+  (df["expected_action"] != df["predicted_action"])
+]
+action_accuracy = 1 - len(action_errors) / len(df)
+
+error_patterns = action_errors[
+    ["expected_action", "predicted_action"]
+].value_counts()
+
+ignore_to_read = action_errors[
+    (action_errors["expected_action"] == "ignore") &
+    (action_errors["predicted_action"] == "read")
+]
+
+print(error_patterns)
+print(
+    action_errors[
+        ["email", "expected_action", "predicted_action"]
+    ]
+)
