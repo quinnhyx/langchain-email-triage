@@ -19,3 +19,6 @@ Thumbs.db
 
 # Local review files
 review/
+
+# Local historical-email vector index
+rag/chroma_db/
