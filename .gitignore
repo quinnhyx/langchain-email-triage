@@ -22,3 +22,6 @@ review/
 
 # Local historical-email vector index
 rag/chroma_db/
+
+# Reproducible local evaluation/generation outputs (keep source fixtures tracked)
+results/
