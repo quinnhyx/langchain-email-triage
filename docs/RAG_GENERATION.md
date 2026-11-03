@@ -11,14 +11,14 @@ No model is automatically downloaded and no index is automatically rebuilt.
 
 ```powershell
 # Same input, prompt and generation settings; only history differs:
-.\.venv\Scripts\python.exe generate_reply.py --email-file examples/incoming_trip.json --mode both --output results/generation_mvp/comparison.json
+.\.venv\Scripts\python.exe -m rag.generate_reply --email-file examples/incoming_trip.json --mode both --output results/generation_mvp/comparison.json
 
 # Individual paths:
-.\.venv\Scripts\python.exe generate_reply.py --email-file examples/incoming_trip.json --mode no-rag
-.\.venv\Scripts\python.exe generate_reply.py --email-file examples/incoming_trip.json --mode rag
+.\.venv\Scripts\python.exe -m rag.generate_reply --email-file examples/incoming_trip.json --mode no-rag
+.\.venv\Scripts\python.exe -m rag.generate_reply --email-file examples/incoming_trip.json --mode rag
 
 # Offline tests (no real Ollama generation):
-.\.venv\Scripts\python.exe -B -m unittest test_reply_generator test_retriever_unit test_evaluation -v
+.\.venv\Scripts\python.exe -B -m unittest discover -v
 ```
 
 Input JSON contains nonblank string fields subject, sender and body; metadata is
@@ -31,7 +31,7 @@ from text. Otherwise retrieval is unfiltered. A caller can override it with a
 native Chroma filter using --metadata-filter or the Python API. PowerShell example:
 
 ```powershell
-.\.venv\Scripts\python.exe generate_reply.py --email-file examples/incoming_trip.json --mode rag --metadata-filter '{ "sender": "eli@family.example" }'
+.\.venv\Scripts\python.exe -m rag.generate_reply --email-file examples/incoming_trip.json --mode rag --metadata-filter '{ "sender": "eli@family.example" }'
 ```
 
 ## Execution flow

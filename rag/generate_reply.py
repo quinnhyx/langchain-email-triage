@@ -32,7 +32,7 @@ def main(argv=None):
                         help="UTF-8 JSON: subject, sender, body, optional metadata.")
     parser.add_argument("--mode", choices=("no-rag", "rag", "both"), default="both")
     parser.add_argument("--metadata-filter", help="Optional native Chroma filter as a JSON object.")
-    parser.add_argument("--persist-dir", type=Path, default=Path(__file__).resolve().parent / "rag/chroma_db")
+    parser.add_argument("--persist-dir", type=Path, default=Path(__file__).resolve().parents[1] / "rag/chroma_db")
     parser.add_argument("--base-url", default="http://localhost:11434")
     parser.add_argument("--output", type=Path, help="Optional JSON file containing settings, context, sources and drafts.")
     args = parser.parse_args(argv)
@@ -53,7 +53,7 @@ def main(argv=None):
             if mode == "rag":
                 # Do not silently create a new/empty index when the path is wrong.
                 if not (args.persist_dir / "chroma.sqlite3").is_file():
-                    raise ValueError("Existing Chroma index not found. Build history separately with test_retrieval.py --build.")
+                    raise ValueError("Existing Chroma index not found. Build history separately with python -m evaluation.retrieval --build.")
                 from rag.email_retriever import EmailRetriever
 
                 retriever = EmailRetriever(persist_directory=args.persist_dir, base_url=args.base_url)

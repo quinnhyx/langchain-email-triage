@@ -12,7 +12,7 @@ from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import patch
 
-import evaluate_triage as evaluation
+from evaluation import triage as evaluation
 
 
 def fixture_predictions(cases):
@@ -77,7 +77,7 @@ class EvaluationTests(unittest.TestCase):
                     # A separate Python process proves the CLI cache branch does
                     # not even import production code, not just that it skips analyze().
                     script = (
-                        "import builtins,sys,pathlib; import evaluate_triage as e; "
+                        "import builtins,sys,pathlib; import evaluation.triage as e; "
                         f"e.RESULTS_DIR=pathlib.Path({str(directory)!r}); "
                         "original=builtins.__import__; "
                         "\ndef guarded(name,*args,**kwargs):\n"

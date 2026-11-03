@@ -9,11 +9,11 @@ from pathlib import Path
 
 import pandas as pd
 
-from test_emails import test_emails
+from evaluation.classification_cases import test_emails
 
 
 QUICK_IDS = (1, 3, 6, 7, 8, 11, 16, 18, 29, 30, 35, 39, 44)
-PROJECT_DIR = Path(__file__).resolve().parent
+PROJECT_DIR = Path(__file__).resolve().parents[1]
 RESULTS_DIR = PROJECT_DIR / "results"
 LABELS = {
     "category": ("job", "shopping", "newsletter", "personal", "other"),

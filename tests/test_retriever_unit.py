@@ -17,7 +17,7 @@ from langchain_core.embeddings import Embeddings
 
 from rag.email_retriever import EmailRetriever, check_embedding_model
 from rag.historical_emails import historical_emails, retrieval_queries
-from test_retrieval import evaluate_retrieval, realistic_metadata_filter, retrieval_metrics
+from evaluation.retrieval import evaluate_retrieval, realistic_metadata_filter, retrieval_metrics
 
 
 class CountingEmbeddings(Embeddings):
@@ -46,7 +46,7 @@ class CountingEmbeddings(Embeddings):
 
 class RetrievalTests(unittest.TestCase):
     def test_fixtures_and_no_classification_leakage(self):
-        from test_emails import test_emails
+        from evaluation.classification_cases import test_emails
 
         documents = EmailRetriever.to_documents(historical_emails)
         ids = {doc.id for doc in documents}
@@ -107,13 +107,13 @@ class RetrievalTests(unittest.TestCase):
             script = (
                 "import json; from rag.email_retriever import EmailRetriever; "
                 "from rag.historical_emails import historical_emails; "
-                "from test_retriever_unit import CountingEmbeddings; "
+                "from tests.test_retriever_unit import CountingEmbeddings; "
                 f"e=CountingEmbeddings(); r=EmailRetriever({directory!r},model_name='offline-test',embeddings=e); "
                 "stats=r.index(historical_emails); "
                 "print(json.dumps({'stats':stats,'embedded':e.document_count})); r.close()"
             )
             process = subprocess.run([sys.executable, "-B", "-c", script],
-                                     cwd=Path(__file__).resolve().parent,
+                                     cwd=Path(__file__).resolve().parents[1],
                                      capture_output=True, text=True, encoding="utf-8")
             self.assertEqual(process.returncode, 0, process.stderr)
             payload = json.loads(process.stdout)
@@ -236,7 +236,7 @@ class RetrievalTests(unittest.TestCase):
                 self.assertEqual(set(ids), {"h004", "h005"})
                 self.assertEqual(retrieval_metrics(ids, retrieval_queries[0]["relevant_ids"])["recall"], 0)
                 # Evaluation explicitly diagnoses relevant IDs eliminated by a bad filter.
-                with patch("test_retrieval.ORACLE_FILTERS", {"q1": {"thread_id": "aster-intern-2025"}}), redirect_stdout(io.StringIO()):
+                with patch("evaluation.retrieval.ORACLE_FILTERS", {"q1": {"thread_id": "aster-intern-2025"}}), redirect_stdout(io.StringIO()):
                     report = evaluate_retrieval(retriever, retrieval_queries[:1], mode="oracle")
                 self.assertEqual(report["queries"][0]["filter_excluded_relevant_ids"],
                                  ["h001", "h002", "h003"])
@@ -271,7 +271,7 @@ class RetrievalTests(unittest.TestCase):
         retriever = MagicMock()
         retriever.search.return_value = [(document, 0.1) for document in documents]
         fixtures = retrieval_queries[:1]
-        with patch("test_retrieval.ORACLE_FILTERS", {}), redirect_stdout(io.StringIO()):
+        with patch("evaluation.retrieval.ORACLE_FILTERS", {}), redirect_stdout(io.StringIO()):
             baseline = evaluate_retrieval(retriever, fixtures)
             realistic = evaluate_retrieval(retriever, fixtures, mode="realistic")
         for call in retriever.search.call_args_list:

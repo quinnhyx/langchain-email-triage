@@ -13,7 +13,7 @@ from langchain_core.documents import Document
 from langchain_core.messages import AIMessage
 from pydantic import ValidationError
 
-import generate_reply
+from rag import generate_reply
 from rag.reply_generator import (
     EmailReplyGenerator, GENERATION_SETTINGS, IncomingEmail, REPLY_PROMPT, build_context,
 )
